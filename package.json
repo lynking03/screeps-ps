@@ -1,0 +1,7 @@
+{
+  "private": true,
+  "description": "Dev-only: the engine's constants table, for tools/gen-shared.py and test globals.",
+  "devDependencies": {
+    "@screeps/common": "2.16.1"
+  }
+}

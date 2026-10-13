@@ -1,0 +1,16 @@
+
+.psa*
+.psc*
+.psc-package/
+.pulp-cache/
+.purs*
+.spago
+.spago/
+bower_components/
+generated-docs/
+node_modules/
+output-es/
+output/
+runs.jsonl
+.done/
+failed/

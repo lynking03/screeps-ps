@@ -1,0 +1,21 @@
+package:
+  name: screeps
+  dependencies:
+    - effect
+    - either
+    - foreign
+    - foreign-object
+    - functions
+    - maybe
+    - nullable
+    - prelude
+    - safe-coerce
+    - unsafe-coerce
+  test:
+    main: Test.Main
+    dependencies:
+      - exceptions
+workspace:
+  packageSet:
+    registry: 81.4.0
+  extraPackages: {}

@@ -1,0 +1,4 @@
+key	title	module	purs	js	spec
+ConstructionSite.part1	ConstructionSite	Screeps.Internal.ConstructionSite.Part1	src/Screeps/Internal/ConstructionSite/Part1.purs	src/Screeps/Internal/ConstructionSite/Part1.js	tasks/ConstructionSite.part1.md
+ConstructionSite.part2	ConstructionSite	Screeps.Internal.ConstructionSite.Part2	src/Screeps/Internal/ConstructionSite/Part2.purs	src/Screeps/Internal/ConstructionSite/Part2.js	tasks/ConstructionSite.part2.md
+ConstructionSite.part3	ConstructionSite	Screeps.Internal.ConstructionSite.Part3	src/Screeps/Internal/ConstructionSite/Part3.purs	src/Screeps/Internal/ConstructionSite/Part3.js	tasks/ConstructionSite.part3.md
