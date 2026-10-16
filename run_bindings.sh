@@ -32,6 +32,7 @@ while IFS=$'\t' read -r key title module purs js spec <&3; do
 
 $(cat "$spec")" \
     --agent binding-writer \
+    --settings '{"claudeMdExcludes": ["**/AGENTS.md", "**/CLAUDE.md", "**/CLAUDE.local.md"]}' \
     --permission-mode dontAsk \
     --permission-prompts none \
     --allowedTools "Edit(/$purs),Edit(/$js),Bash(spago build)" \
