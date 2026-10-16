@@ -166,7 +166,10 @@ def expected_functions(m, title):
         opts_param = None
         if optionals and params[-1][1]:
             last = params[-1][0]
-            if last in OBJECT_OPT_NAMES or m.param_types.get(last, "").startswith("object"):
+            ptype = m.param_types.get(last, "").strip()
+            # only a plain `object` counts; `object, function` (a filter) is a
+            # positional optional whose function form is bound (nameFilter)
+            if last in OBJECT_OPT_NAMES or re.fullmatch(r"object(<[^>]*>)?", ptype):
                 opts_param = last
         positional = [p for p in optionals if p != opts_param]
         stem = base + suffix
