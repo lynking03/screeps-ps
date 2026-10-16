@@ -32,7 +32,7 @@ lookAtXY = runEffectFn3 lookAtXYImpl
 -- lookAtArea 'top, left, bottom, right, [asArray]' → 1 variant × 1 × (1 optional + 1) = 2 functions
 
 foreign import lookAtAreaImpl :: EffectFn5 Room Int Int Int Int (Object (Object (Array Foreign)))
-foreign import lookAtAreaAsArrayImpl :: EffectFn6 Room Int Int Int Int Boolean (Array Foreign)
+foreign import lookAtAreaAsArrayImpl :: EffectFn5 Room Int Int Int Int (Array Foreign)
 
 -- | Get the list of objects at the specified room area.
 -- NOTE: result is keyed result[y][x] (outer key y, inner key x); each element is a tagged object, not modeled, use Foreign
@@ -41,8 +41,8 @@ lookAtArea = runEffectFn5 lookAtAreaImpl
 
 -- | Get the list of objects at the specified room area.
 -- NOTE: each element is a tagged object with x, y and type fields; element format not modeled, use Foreign
-lookAtAreaAsArray :: Room -> Int -> Int -> Int -> Int -> Boolean -> Effect (Array Foreign)
-lookAtAreaAsArray = runEffectFn6 lookAtAreaAsArrayImpl
+lookAtAreaAsArray :: Room -> Int -> Int -> Int -> Int -> Effect (Array Foreign)
+lookAtAreaAsArray = runEffectFn5 lookAtAreaAsArrayImpl
 
 -- lookForAt 'type, x, y|type, target' → 2 variants × 1 × 1 = 2 functions
 
