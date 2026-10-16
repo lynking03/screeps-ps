@@ -67,4 +67,4 @@ $(cat "$spec")" \
   fi
 done 3< "$manifest"
 
-echo "Loop finished. Next: python3 tools/split_specs.py facades $manifest && spago build && python3 tools/verify_bindings.py --manifest $manifest"
+echo "Loop finished. Next: python3 tools/split_specs.py facades $manifest && spago build && python3 tools/verify_bindings.py --manifest $manifest --skip tools/handwritten.txt"

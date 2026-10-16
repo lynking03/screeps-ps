@@ -45,6 +45,9 @@ TYPE_NAMES = {"StructureSpawn.Spawning": "StructureSpawnSpawning",
               "PathFinder.CostMatrix": "CostMatrix"}
 BASE_PARAMS = {"target", "pos", "pos1", "topLeftPos", "type"}
 OBJECT_OPT_NAMES = {"opts", "style"}
+# optional boolean flags that change the return type: the suffixed variant fixes
+# the flag to true and takes no argument for it (lookAtAreaAsArray, getEventLogRaw)
+RETURN_FLAGS = {"asArray", "raw"}
 GLOBALS = r"(Game|Memory|RawMemory|InterShardMemory|PathFinder)"
 
 
@@ -95,7 +98,7 @@ class Member:
         self.has_codes = "{% api_return_codes %}" in self.returns
         self.value_or_error = bool(re.search(r"or one of the following error codes",
                                              self.returns, re.I))
-        self.nullable = bool(re.search(r"\bor (`?null`?|`?undefined`?)\b",
+        self.nullable = bool(re.search(r"(?<!false )\bor (`?null`?|`?undefined`?)\b",
                                        self.returns, re.I))
 
     @property
@@ -169,7 +172,7 @@ def expected_functions(m, title):
         stem = base + suffix
         for i in range(len(positional) + 1):
             name = stem + "".join(pascal(o) for o in positional[:i])
-            plist = required + positional[:i]
+            plist = required + [o for o in positional[:i] if o not in RETURN_FLAGS]
             out.append((name, plist))
             if opts_param:
                 out.append((name + "'", plist + [opts_param]))
@@ -306,9 +309,28 @@ def parse_js(text):
 
 # ---------------------------------------------------------------- checks
 
-def check_task(row, rep, observations, notes):
+def load_skip(values):
+    """Same format as split_specs.py plan --skip: Title:member entries or files of them."""
+    skip = set()
+    for value in values or []:
+        lines = Path(value).read_text(encoding="utf-8").splitlines() \
+            if Path(value).is_file() else [value]
+        for line in lines:
+            line = line.split("#", 1)[0].strip()
+            if line:
+                skip.add(line)
+    return skip
+
+
+def is_skipped(title, member_name, skip):
+    return (f"{title}:{member_name}" in skip
+            or f"{title}:{member_name.split('.')[-1]}" in skip)
+
+
+def check_task(row, rep, observations, notes, skip=frozenset()):
     key, title, purs, js = row["key"], row["title"], row["purs"], row["js"]
-    members = parse_spec(row["spec"])
+    members = [m for m in parse_spec(row["spec"])
+               if not is_skipped(row["title"], m.name, skip)]
     ppath, jpath = Path(purs), Path(js)
     if not ppath.exists():
         rep.add("MISSING", key, f"{purs} not generated")
@@ -360,7 +382,7 @@ def check_task(row, rep, observations, notes):
             else:
                 for pname, a in zip(plist, args[obj:]):
                     observations["param"][pname].append((norm_arg(a, cons), f"{where} `{name}`"))
-            needs_eff = m.cost == "A" or m.has_codes or m.is_static
+            needs_eff = (m.cost == "A" or m.has_codes or m.is_static) and name != "newRoomPosition"
             if needs_eff and not result.startswith("Effect"):
                 lvl = "ERROR" if (m.cost == "A" or m.has_codes) else "WARN"
                 rep.add(lvl, where, f"`{name}` returns `{result}`, expected Effect")
@@ -373,6 +395,9 @@ def check_task(row, rep, observations, notes):
                 rep.add("WARN", where, f"`{name}` returns `{result}`; doc says it can be null")
     for e in exports:
         if e in expected_all:
+            continue
+        if e.endswith("Impl") and e in foreign:
+            rep.add("ERROR", key, f"exports internal FFI import `{e}` (remove it from the export list)")
             continue
         if any(e.startswith(b) and len(e) > len(b) and e[len(b)].isupper() for b in bases):
             rep.add("WARN", key, f"extra export `{e}` (a union split? check it)")
@@ -468,10 +493,12 @@ def read_runs(path):
         res = obj.get("result", "") if isinstance(obj, dict) else ""
         last = (res or "").strip().splitlines()[-1:] or [""]
         mm = re.search(r"MISSING:\s*([^|]*)", last[0])
-        if mm and mm.group(1).strip() not in ("", "-"):
-            for item in mm.group(1).split(","):
-                if item.strip():
-                    missing[item.strip()] += 1
+        field = mm.group(1).strip().strip("`*_ ").strip() if mm else ""
+        if field and field != "-":
+            for item in split_top(field, ","):
+                item = item.strip().strip("`").strip()
+                if item and item != "-":
+                    missing[item] += 1
     return missing
 
 
@@ -482,6 +509,9 @@ def main():
     ap.add_argument("--runs", default="runs.jsonl")
     ap.add_argument("--allow-missing", action="store_true",
                     help="don't count ungenerated modules as errors")
+    ap.add_argument("--skip", action="append", metavar="TITLE:MEMBER|FILE",
+                    help="ignore members removed or written by hand (same format as "
+                    "split_specs.py plan --skip; e.g. --skip tools/handwritten.txt)")
     ap.add_argument("--notes-full", action="store_true",
                     help="list every NOTE with its location")
     args = ap.parse_args()
@@ -492,7 +522,7 @@ def main():
     with open(args.manifest, encoding="utf-8") as f:
         rows = list(csv.DictReader(f, delimiter="\t"))
     for row in rows:
-        check_task(row, rep, observations, notes)
+        check_task(row, rep, observations, notes, load_skip(args.skip))
     check_consistency(observations, rep)
     missing_shared = read_runs(args.runs)
 

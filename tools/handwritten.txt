@@ -1,1 +1,5 @@
 Game:Game.getObjectById
+Game:Game.cpu
+Game:Game.map
+Game:Game.market
+Game:Game.shard
