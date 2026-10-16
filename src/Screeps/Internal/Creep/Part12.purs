@@ -1,12 +1,8 @@
 module Screeps.Internal.Creep.Part12
   ( repair
-  , repairImpl
   , reserveController
-  , reserveControllerImpl
   , say
   , sayPublic
-  , sayImpl
-  , sayPublicImpl
   ) where
 
 import Effect (Effect)
