@@ -1,7 +1,6 @@
 module Screeps.Internal.Game.Part4
   ( resources
   , rooms
-  , shard
   ) where
 
 import Effect (Effect)
@@ -15,7 +14,3 @@ foreign import resources :: Effect (Object Int)
 
 -- | A hash containing all the rooms available to you with room names as hash keys.
 foreign import rooms :: Effect (Object Room)
-
--- | A global object describing the world shard where your script is currently being executed in.
--- NOTE: shard fields are not listed in the spec, so the object is returned as Foreign
-foreign import shard :: Effect Foreign
