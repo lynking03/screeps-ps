@@ -5,6 +5,7 @@ module Screeps.Internal.StructureLab.Part1
   ) where
 
 import Screeps.Types (StructureLab, Store)
+import Screeps.Constants (ResourceConstant)
 
 -- | The amount of game ticks the lab has to wait until the next reaction or unboost operation is possible.
 foreign import cooldown :: StructureLab -> Int
